@@ -12,26 +12,30 @@ def save_reshape_image(src_path, trg_path, row_size, col_size, remain_mono_img =
     if(remain_mono_img or img_dim==3):
         img_resize.save(trg_path)
 
-def get_jpg_namelist(path):
+def get_jpg_namelist(path, extension = 'png'):
     ls = os.listdir(path)
     ls_jpg = []
     for file in ls:
-        if ('.png' in file):
+        if (('.' + extension) in file):
             ls_jpg.append(file)
-    assert len(ls_jpg) > 0, 'jpgファイルが１つも見つかりませんでした。'
+    assert len(ls_jpg) > 0, 'ファイルが１つも見つかりませんでした。ディレクトリもしくは拡張子の確認をお願いします。'
     return ls_jpg
 
 def main():
     parser = argparse.ArgumentParser(description='クラス別階層構造になっている画像を一括でreshape')
     parser.add_argument('--dir', help='画像が置いているディレクトリ',
-                        default='C:\\Users\\yawata\\Desktop\\workspace\\src\chainer\\examples\\imagenet\\101_ObjectCategories')
+                        default='image')
+    parser.add_argument('--ex', help='画像の拡張子',default='png')
     parser.add_argument('--row_length', default=224)
     parser.add_argument('--col_length', default=224)
+    parser.add_argument('--mono', help='mono画像を消したい場合場合は0', default=1)
     args = parser.parse_args()
 
     images_dir = args.dir
     row_length = args.row_length
     col_length = args.col_length
+    ex = args.ex
+    mono = args.mono
 
     # make hierarchal directoris
     main_dir_name = (images_dir.split('\\'))[-1]+'_reshape'
@@ -45,16 +49,12 @@ def main():
         output_dir = main_dir_name + '\\' + class_dir_name
         if (not (class_dir_name in os.listdir(main_dir_name))):
             os.mkdir(output_dir)
-        class_jpgfile_ls = get_jpg_namelist(input_dir)
+        class_jpgfile_ls = get_jpg_namelist(input_dir, ex)
         for jpg_file in class_jpgfile_ls:
             input_jpg = input_dir + '\\' + jpg_file
             output_jpg = output_dir + '\\' + jpg_file
-            save_reshape_image(input_jpg, output_jpg, row_length, col_length, 0)
+            save_reshape_image(input_jpg, output_jpg, row_length, col_length, mono)
 
-
-    #src_path = 'C:\\Users\\yawata\\Desktop\\workspace\\src\chainer\\examples\\imagenet\\101_ObjectCategories\\accordion\\image_0020.jpg'
-    #workdir = 'C:\\Users\\yawata\\Desktop\\workspace\\src\chainer\\examples\\imagenet\\test.jpg'
-    #save_reshape_image(src_path, workdir, 200, 200)
 
 if __name__ == '__main__':
     main()
